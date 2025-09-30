@@ -1,0 +1,100 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historia de Colo Colo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #0033A0;
+        }
+        section {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #C8102E;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 10px auto;
+            border-radius: 4px;
+        }
+        p {
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <h1>Historia de Colo Colo: El Cacique del Fútbol Chileno</h1>
+    
+    <section id="seccion1">
+        <h2>Fundación y Orígenes (1925)</h2>
+        <p>Club Social y Deportivo Colo-Colo fue fundado el 19 de abril de 1925 en Santiago de Chile por David Arellano y otros apasionados del fútbol. El nombre rinde homenaje al líder mapuche Colo Colo, símbolo de resistencia y valentía. Desde sus inicios, el club se caracterizó por su estilo ofensivo y su conexión con la identidad chilena.</p>
+        <img src="images/historia1.jpg" alt="Imagen de la fundación de Colo Colo en 1925">
+    </section>
+    
+    <section id="seccion2">
+        <h2>Éxitos Nacionales e Internacionales (Décadas de 1970-1990)</h2>
+        <p>En las décadas de oro, Colo Colo conquistó múltiples títulos de la Primera División chilena y se convirtió en el primer equipo chileno en ganar la Copa Libertadores en 1991, derrotando al Olimpia paraguayo en la final. Figuras legendarias como Caszely y Rozental marcaron esta era de gloria.</p>
+        <img src="images/historia2.jpg" alt="Imagen de la victoria en la Copa Libertadores 1991">
+    </section>
+    
+    <section id="seccion3">
+        <h2>Legado Moderno y Rivalidades (2000 en adelante)</h2>
+        <p>En el siglo XXI, Colo Colo ha mantenido su dominio en el fútbol chileno con más de 30 títulos nacionales. Su rivalidad con Universidad de Chile y Universidad Católica define el "Clásico Universitario". Hoy, el club sigue inspirando a generaciones con su espíritu guerrero.</p>
+        <img src="images/historia3.jpg" alt="Imagen de un partido moderno de Colo Colo en el Estadio Monumental">
+    </section>
+</body>
+</html>
